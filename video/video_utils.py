@@ -3,6 +3,8 @@ import subprocess
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.editor import VideoFileClip
 
+from video.py_ffmpeg import py_ffmpeg
+
 # todo fill the ffmpeg bin path
 ffmpeg_bin = "D:/devsoft/FFmpeg/ffmpeg-6.0-essentials_build/bin/"
 default_audio_codec = "aac"
@@ -26,14 +28,28 @@ def extract_audio(video_path, output_path):
 
 def extract_audio_ffmpeg(video_path, output_audio_path):
     command = [
-        ffmpeg_bin + 'ffmpeg',
+        'ffmpeg',
         '-i', video_path,
         '-vn',  # 禁用视频流
         '-acodec', 'copy',  # 拷贝音频流
         output_audio_path
     ]
 
-    subprocess.run(command, check=True)
+    py_ffmpeg(command)
+
+
+def extract_audio_ffmpeg_start_from(input_video, output_audio, start_time, duration):
+    command = [
+        'ffmpeg',
+        '-i', input_video,
+        '-vn',  # 禁用视频流
+        '-acodec', 'copy',  # 拷贝音频流
+        '-ss', start_time,  # 起始时间
+        '-t', duration,  # 持续时间
+        output_audio
+    ]
+
+    py_ffmpeg(' '.join(command))
 
 
 def extract_video_without_audio(video_path, output_path):
@@ -89,7 +105,12 @@ def replace_audio_fast(video_path, new_audio_path, output_path):
 
 def replace_audio_ffmpeg(video_path, new_audio_path, output_path):
     # 使用ffmpeg命令合并视频和音频，不重新渲染
-    command = f'{ffmpeg_bin}ffmpeg -i "{video_path}" -i "{new_audio_path}" -c copy -map 0:v -map 1:a  "{output_path}"'
+    command = f'ffmpeg -i "{video_path}" -i "{new_audio_path}" -c copy -map 0:v -map 1:a  "{output_path}"'
 
     # 执行命令
     subprocess.call(command, shell=True)
+
+
+def convert_wav_to_aac(input_audio,output_audio):
+    command = f'ffmpeg -i  "{input_audio}" -c:a aac -strict experimental  "{output_audio}"'
+    py_ffmpeg(command)

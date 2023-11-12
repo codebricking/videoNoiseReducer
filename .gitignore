@@ -4,3 +4,4 @@ __pycache__
 
 # 忽略PyCharm项目文件
 .idea/
+.ipynb_checkpoints/
